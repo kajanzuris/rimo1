@@ -1,0 +1,56 @@
+name: Render Video
+
+on:
+  workflow_dispatch:
+    inputs:
+      folder:
+        description: "Nama folder di public/ (contoh: video1)"
+        required: true
+        default: "video1"
+      audio_mode:
+        description: "Suara: video (suara asli), mp3 (pakai file audio), both (keduanya), mute (tanpa suara)"
+        type: choice
+        default: "video"
+        options:
+          - video
+          - mp3
+          - both
+          - mute
+      output_name:
+        description: "Nama file hasil (tanpa .mp4)"
+        required: true
+        default: "final"
+      seed:
+        description: "Seed variasi tampilan (kosongkan = otomatis dari nama folder)"
+        required: false
+        default: ""
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Siapkan job (cari video, mp3, srt, hitung durasi)
+        run: node scripts/job.mjs "${{ inputs.folder }}" "${{ inputs.audio_mode }}" "${{ inputs.seed }}"
+
+      - name: Render video
+        run: npx remotion render Main out/${{ inputs.output_name }}.mp4 --props=job.json
+
+      - name: Upload hasil
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.output_name }}
+          path: out/${{ inputs.output_name }}.mp4
