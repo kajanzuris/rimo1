@@ -1,0 +1,49 @@
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
+
+const [folder = "video1", audioMode = "video", seedArg = ""] = process.argv.slice(2);
+const dir = path.join("public", folder);
+if (!fs.existsSync(dir)) throw new Error(`Folder tidak ada: ${dir}`);
+
+const files = fs.readdirSync(dir).sort();
+const pick = (exts) =>
+  files.find((f) => exts.includes(path.extname(f).toLowerCase()));
+
+const video = pick([".mp4", ".mov", ".webm", ".mkv"]);
+const audio = pick([".mp3", ".wav", ".m4a", ".aac"]);
+const srt = pick([".srt"]);
+
+if (!video) throw new Error(`Tidak ada file video di ${dir}`);
+if ((audioMode === "mp3" || audioMode === "both") && !audio)
+  throw new Error(`Mode "${audioMode}" tapi tidak ada file audio di ${dir}`);
+
+// srt disalin ke lokasi tetap yang dibaca Composition.tsx
+if (srt) fs.copyFileSync(path.join(dir, srt), "public/subs.srt");
+else fs.writeFileSync("public/subs.srt", "");
+
+const durationSec = parseFloat(
+  execSync(
+    `ffprobe -v error -show_entries format=duration -of csv=p=0 "${path.join(dir, video)}"`
+  )
+    .toString()
+    .trim()
+);
+
+// seed: manual kalau diisi, otomatis dari nama folder kalau kosong
+const autoSeed = [...folder].reduce(
+  (a, c) => (a * 31 + c.charCodeAt(0)) % 100000,
+  7
+);
+const seed = seedArg !== "" && !isNaN(Number(seedArg)) ? Number(seedArg) : autoSeed;
+
+const job = {
+  video: `${folder}/${video}`,
+  audio: audio ? `${folder}/${audio}` : "",
+  audioMode, // video | mp3 | both | mute
+  durationSec,
+  seed,
+};
+
+fs.writeFileSync("job.json", JSON.stringify(job, null, 2));
+console.log(job);
