@@ -9,11 +9,6 @@ import { Particles } from "./components/Particles";
 import { CallToAction } from "./components/CallToAction";
 import { parseSrt } from "./utils/parse-srt";
 import { VIDEO, THEME, PALETTES } from "./config";
-import path from "path";
-
-// Parse SRT at bundle time (Node-side)
-const SRT_PATH = path.join(process.cwd(), "public", "subs.srt");
-const segments = parseSrt(SRT_PATH, VIDEO.fps);
 
 export type MainProps = {
   video: string;
@@ -21,6 +16,8 @@ export type MainProps = {
   audioMode: "video" | "mp3" | "both" | "mute";
   durationSec: number;
   seed: number;
+  /** Raw SRT file content (passed via job.json props) */
+  srtContent: string;
 };
 
 const ALL_STYLES = ["bounce", "scale", "wave", "typewriter"] as const;
@@ -30,7 +27,10 @@ export const MainComposition: React.FC<MainProps> = ({
   audio,
   audioMode,
   seed,
+  srtContent,
 }) => {
+  // Parse SRT from props string (no filesystem access needed)
+  const segments = parseSrt(srtContent ?? "", VIDEO.fps);
   // Palet warna per seed (komponen lain membaca THEME)
   Object.assign(THEME, PALETTES[seed % PALETTES.length]);
 
