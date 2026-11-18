@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
   "dev": "npx remotion studio",
-  "build": "npx remotion render Main out/final.mp4",
+  "build": "npx remotion render src/index.ts Main out/final.mp4",
   "generate-vo": "node scripts/generate-vo.mjs",
   "check-assets": "node scripts/prepare.mjs",
   "job": "node scripts/job.mjs"
