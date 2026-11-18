@@ -22,9 +22,10 @@ const mode = audioMode === "auto" ? (audio ? "mp3" : "video") : audioMode;
 if ((mode === "mp3" || mode === "both") && !audio)
   throw new Error(`Mode "${mode}" tapi tidak ada file audio di ${dir}`);
 
-// srt disalin ke lokasi tetap yang dibaca Composition.tsx
-if (srt) fs.copyFileSync(path.join(dir, srt), "public/subs.srt");
-else fs.writeFileSync("public/subs.srt", "");
+// srt: baca isinya langsung ke job.json (Composition tidak bisa baca filesystem)
+const srtContent = srt ? fs.readFileSync(path.join(dir, srt), "utf-8") : "";
+
+// (tidak perlu menyalin ke public/subs.srt lagi)
 
 const durationSec = parseFloat(
   execSync(
@@ -47,6 +48,7 @@ const job = {
   audioMode: mode, // video | mp3 | both | mute
   durationSec,
   seed,
+  srtContent,
 };
 
 fs.writeFileSync("job.json", JSON.stringify(job, null, 2));
