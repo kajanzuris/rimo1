@@ -45,6 +45,11 @@ jobs:
         uses: browser-actions/setup-chrome@v1
         id: setup-chrome
 
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
       - name: Install dependencies
         run: npm ci || npm install
 
