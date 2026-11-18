@@ -9,6 +9,7 @@ const defaultProps: MainProps = {
   audioMode: "mp3",
   durationSec: VIDEO.durationFrames / VIDEO.fps,
   seed: 1,
+  srtContent: "",
 };
 
 export const RemotionRoot: React.FC = () => {
