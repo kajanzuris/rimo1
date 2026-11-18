@@ -1,4 +1,3 @@
-import fs from "fs";
 import type { SubSegment } from "../types";
 import { KEYWORDS } from "../config";
 
@@ -8,8 +7,9 @@ function timeToSec(t: string): number {
   return +h * 3600 + +m * 60 + +s + +ms / 1000;
 }
 
-export function parseSrt(srtPath: string, fps: number): SubSegment[] {
-  const raw = fs.readFileSync(srtPath, "utf-8");
+export function parseSrt(srtContent: string, fps: number): SubSegment[] {
+  const raw = srtContent;
+  if (!raw || !raw.trim()) return [];
   const blocks = raw.trim().split(/\n\s*\n/);
 
   return blocks.map((block) => {
