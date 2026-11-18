@@ -8,10 +8,11 @@ on:
         required: true
         default: "video1"
       audio_mode:
-        description: "Suara: video (suara asli), mp3 (pakai file audio), both (keduanya), mute (tanpa suara)"
+        description: "Suara: auto (mp3 kalau ada, kalau tidak suara video), video, mp3, both, mute"
         type: choice
-        default: "video"
+        default: "auto"
         options:
+          - auto
           - video
           - mp3
           - both
