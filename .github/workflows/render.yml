@@ -45,7 +45,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
       - name: Install ffmpeg
         run: |
@@ -58,13 +57,13 @@ jobs:
           ffmpeg -version | head -1
 
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
+        run: npm install --no-audit --no-fund
 
       - name: Cache browser Remotion
         uses: actions/cache@v4
         with:
           path: node_modules/.remotion
-          key: remotion-browser-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: remotion-browser-${{ runner.os }}-${{ hashFiles('package.json') }}
 
       - name: Siapkan job (cari video, mp3, srt, hitung durasi)
         run: node scripts/job.mjs "${{ inputs.folder }}" "${{ inputs.audio_mode }}" "${{ inputs.seed }}"
