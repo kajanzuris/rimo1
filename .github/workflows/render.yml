@@ -41,8 +41,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install ffmpeg (untuk ffprobe)
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install ffmpeg + Chrome dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ffmpeg \
+            libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
+            libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
+            libxfixes3 libxrandr2 libgbm1 libasound2
 
       - name: Install dependencies
         run: npm ci || npm install
@@ -51,7 +57,7 @@ jobs:
         run: node scripts/job.mjs "${{ inputs.folder }}" "${{ inputs.audio_mode }}" "${{ inputs.seed }}"
 
       - name: Render video
-        run: npx remotion render src/index.ts Main out/${{ inputs.output_name }}.mp4 --props=job.json
+        run: npx remotion render src/index.ts Main out/${{ inputs.output_name }}.mp4 --props=job.json --gl=swiftshader
 
       - name: Upload hasil
         uses: actions/upload-artifact@v4
