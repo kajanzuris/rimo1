@@ -41,14 +41,12 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install ffmpeg + Google Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg
 
-          # Install Google Chrome stable
-          wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt-get install -y /tmp/chrome.deb
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
 
       - name: Install dependencies
         run: npm ci || npm install
@@ -57,7 +55,7 @@ jobs:
         run: node scripts/job.mjs "${{ inputs.folder }}" "${{ inputs.audio_mode }}" "${{ inputs.seed }}"
 
       - name: Render video
-        run: npx remotion render src/index.ts Main out/${{ inputs.output_name }}.mp4 --props=job.json --gl=swiftshader --browser-executable=$(which google-chrome)
+        run: npx remotion render src/index.ts Main out/${{ inputs.output_name }}.mp4 --props=job.json --gl=swiftshader --browser-executable="${{ steps.setup-chrome.outputs.chrome-path }}"
 
       - name: Upload hasil
         uses: actions/upload-artifact@v4
