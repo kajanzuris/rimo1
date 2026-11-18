@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
 
-const [folder = "video1", audioMode = "video", seedArg = ""] = process.argv.slice(2);
+const [folder = "video1", audioMode = "auto", seedArg = ""] = process.argv.slice(2);
 const dir = path.join("public", folder);
 if (!fs.existsSync(dir)) throw new Error(`Folder tidak ada: ${dir}`);
 
@@ -15,8 +15,12 @@ const audio = pick([".mp3", ".wav", ".m4a", ".aac"]);
 const srt = pick([".srt"]);
 
 if (!video) throw new Error(`Tidak ada file video di ${dir}`);
-if ((audioMode === "mp3" || audioMode === "both") && !audio)
-  throw new Error(`Mode "${audioMode}" tapi tidak ada file audio di ${dir}`);
+
+// auto: pakai mp3 kalau ada, kalau tidak pakai suara video
+const mode = audioMode === "auto" ? (audio ? "mp3" : "video") : audioMode;
+
+if ((mode === "mp3" || mode === "both") && !audio)
+  throw new Error(`Mode "${mode}" tapi tidak ada file audio di ${dir}`);
 
 // srt disalin ke lokasi tetap yang dibaca Composition.tsx
 if (srt) fs.copyFileSync(path.join(dir, srt), "public/subs.srt");
@@ -40,10 +44,10 @@ const seed = seedArg !== "" && !isNaN(Number(seedArg)) ? Number(seedArg) : autoS
 const job = {
   video: `${folder}/${video}`,
   audio: audio ? `${folder}/${audio}` : "",
-  audioMode, // video | mp3 | both | mute
+  audioMode: mode, // video | mp3 | both | mute
   durationSec,
   seed,
 };
 
 fs.writeFileSync("job.json", JSON.stringify(job, null, 2));
-console.log(job);
+console.log("Job:", job);
